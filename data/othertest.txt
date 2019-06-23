@@ -1,0 +1,34 @@
+'''
+from astroquery.jplhorizons import Horizons
+from time import gmtime, strftime
+
+indicies = [[199,-1,-1], [299,-1,-1], [399,301,301], [499,401,402], [599,501,560], [699,601,653], [799,701,729], [899,801,814], [999,901,905]]
+
+_AU = 1.496e+11
+
+def vectorToLine(vec):
+    position = [vec['x'][0]*_AU,vec['y'][0]*_AU,vec['z'][0]*_AU]
+    velocity = [vec['vx'][0]*_AU/24/60/60,vec['vy'][0]*_AU/24/60/60,vec['vz'][0]*_AU/24/60/60]
+    return f"%s,%f,%f,%f,%f,%f,%f\n" % (vec['targetname'][0], position[0], position[1], position[2], velocity[0], velocity[1], velocity[2])
+
+
+buffer = []
+file_ = open(strftime("%Y-%m-%d %H-%M-%S", gmtime()) + '.csv', "w")
+
+for planet in indicies:
+    buffer.append(vectorToLine(Horizons(id=str(planet[0]), location='500@10', epochs={'start':'2000-01-01', 'stop':'2000-01-02', 'step':'1d'}, id_type='majorbody').vectors()))
+    if(planet[1] != -1 and planet[2] != -1):
+        for satellite in range(planet[1], planet[2]+1):
+            buffer.append(vectorToLine(Horizons(id=str(satellite), location='500@10', epochs={'start':'2000-01-01', 'stop':'2015-01-02', 'step':'1d'}, id_type='majorbody').vectors()))
+
+file_.write(''.join(buffer))
+file_.close()
+
+
+
+print(vectorToLine(Horizons(id='399', location='500@10', epochs={'start':'2019-03-15', 'stop':'2019-03-16', 'step':'1d'}, id_type='majorbody').vectors()))
+
+obj = Horizons(id='399', location='500@10', epochs={'start':'2000-01-01', 'stop':'2000-01-02', 'step':'1d'}, id_type='majorbody')
+el = obj.vectors()
+print(obj.uri)
+'''

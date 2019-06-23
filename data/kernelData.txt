@@ -1,0 +1,37 @@
+
+\begindata
+   KERNELS_TO_LOAD=(
+    'kernel/c2013a1_s105_merged.bsp',
+    'kernel/codes_300ast_20100725.bsp',
+    'kernel/de405.bsp',
+    'kernel/de413.bsp',
+    'kernel/de421.bsp',
+    'kernel/de430.bsp',
+    'kernel/de430_plus_MarsPC.bsp',
+    'kernel/de431t.bsp',
+    'kernel/de432s.bsp',
+    'kernel/de435.bsp',
+    'kernel/de438t.bsp',
+    'kernel/dss_35_36_prelim_itrf93_140620.bsp',
+    'kernel/earthstns_fx_050714.bsp',
+    'kernel/earthstns_itrf93_050714.bsp',
+    'kernel/ison.bsp',
+    'kernel/jup310.bsp',
+    'kernel/jup341.bsp',
+    'kernel/latest_leapseconds.tls',
+    'kernel/mar097.bsp',
+    'kernel/ndosl_140530_v01.bsp',
+    'kernel/nep081.bsp',
+    'kernel/nep090.bsp',
+    'kernel/sat319.bsp',
+    'kernel/sat368.bsp',
+    'kernel/sat375(1).bsp',
+    'kernel/sat375.bsp',
+    'kernel/sat393.bsp',
+    'kernel/sat393_daphnis.bsp',
+    'kernel/siding_spring_8-19-14.bsp',
+    'kernel/siding_spring_s46.bsp',
+    'kernel/ura111.bsp',
+    'kernel/ura112.bsp'
+   )
+\begintext
