@@ -70,25 +70,25 @@ public class PhysicalObject implements Cloneable {
 
         // force
         Vector3 sum = new Vector3();
-        for (PhysicalObject other : objectList) {
-            if (this != other) {
-                // F = (GMm)/(r^2)
-                final double F = (Universe._G * this.getMass() * other.getMass()) / Math.pow(other.getPosition().subtract(this.getPosition()).length(), 2);
+        if(!(this instanceof CannonBall)) {
+            for (PhysicalObject other : objectList) {
+                if (this != other && !(other instanceof CannonBall)) {
+                    // F = (GMm)/(r^2)
+                    final double F = (Universe._G * this.getMass() * other.getMass()) / Math.pow(other.getPosition().subtract(this.getPosition()).length(), 2);
 
-                assert !Double.isNaN(F);
+                    assert !Double.isNaN(F);
 
-                // force components for x and y
-                sum = sum.add(other.getPosition().subtract(this.getPosition()).normalise().multiply(F));
+                    // force components for x and y
+                    sum = sum.add(other.getPosition().subtract(this.getPosition()).normalise().multiply(F));
+                }
             }
         }
 
 
         if (_USE_RUNGE_KUTTA) {
-            Vector3[] basicBITCH;
-
-            basicBITCH = RungeKutta.solve(this.velocity, this.position, RungeKutta.Interval.of(0, universe._TIME_DELTA), sum.divide(getMass()));
-            this.velocity = basicBITCH[1];
-            this.position = basicBITCH[0];
+            Vector3[] vectors = RungeKutta.solve(this.velocity, this.position, RungeKutta.Interval.of(0, universe._TIME_DELTA), sum.divide(getMass()));
+            this.velocity = vectors[1];
+            this.position = vectors[0];
         } else {
             Vector3 a = sum.divide(getMass());
             this.setVelocity(this.getVelocity().add(new Vector3(a.getX(), a.getY(), a.getZ()).multiply(universe._TIME_DELTA)));

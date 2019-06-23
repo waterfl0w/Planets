@@ -73,7 +73,7 @@ public class CannonBall extends PhysicalObject {
         if(this.target.getPosition().subtract(this.getPosition()).multiply(1D / universe._TIME_DELTA).length()-target.getRadius() < getVelocity().length()) {
             this.setVelocity(this.target.getVelocity());
             isHit = true;
-
+            System.out.println("hti");
         } else if(accelerateInSeconds > 0) {
             // update velocity v(t+1)=v(t) + dT * a
             Vector3 velocity = this.getVelocity();

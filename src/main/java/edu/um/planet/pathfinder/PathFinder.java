@@ -1,5 +1,6 @@
 package edu.um.planet.pathfinder;
 
+import edu.um.landing.FuelTracker;
 import edu.um.planet.Universe;
 import edu.um.planet.gui.Debugger;
 import edu.um.planet.physics.CannonBall;
@@ -7,6 +8,7 @@ import edu.um.planet.physics.PhysicalObject;
 import edu.um.planet.math.Vector3;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.concurrent.TimeUnit;
 
 import java.util.List;
@@ -32,24 +34,22 @@ public class PathFinder {
         universe._TIME_DELTA = 60;
         universe._LOOP_ITERATIONS = 1;
         universe.save();
-        start();
+        simulateTimePeriod(TimeUnit.DAYS.toMinutes(7), 30);
     }
 
-    public void start() {
+    public void simulateTimePeriod(double timeDelta, double tests) {
 
-
-        // int id, PhysicalObject target, Vector3 position, Vector3 velocity, Vector3 acceleration, double accelerateInSeconds
         for (int j = 0; j < 1; j++) {
 
             List<TimeMeta> futurePoints = new ArrayList<>();
-            universe._LOOP_ITERATIONS = 24 * 60 * 7;
-            for (int i = 0; i < 4; i++) {
+            universe._LOOP_ITERATIONS = (int) timeDelta;
+            for (int i = 0; i < tests; i++) {
                 universe.update();
                 System.out.println(i);
                 futurePoints.add(new TimeMeta(end.getPosition().clone(), universe.getTimeSinceStart()));
             }
 
-            List<CannonBall> rockets = new ArrayList<>();
+            List<Rocket> rockets = new ArrayList<>();
             Debugger.lockSimulation(() -> {
                 universe.recover();
                 start = universe.getCelestialBody(start.getId());
@@ -70,7 +70,7 @@ public class PathFinder {
             final long timing = TimeUnit.DAYS.toSeconds(1);
             long timeToNextStart = timing;
 
-            while (anyoneGettingCloser || allLaunched){
+            while (anyoneGettingCloser || !allLaunched){
                 timeToNextStart -= universe.getUpdateStep();
 
                 if(launchIndex.get() < futurePoints.size() && timeToNextStart <= 0) {
@@ -91,31 +91,56 @@ public class PathFinder {
                                 TimeUnit.MINUTES.toSeconds(10)
                         );
                         universe.getBodies().add(rocket);
-                        rockets.add(rocket);
+                        rockets.add(new Rocket(meta, rocket));
                         globalId--;
                     });
                     timeToNextStart = timing;
                     launchIndex.incrementAndGet();
                 } else if(launchIndex.get() >= futurePoints.size()) {
                     allLaunched = true;
+                    System.out.println("all launched");
                 }
 
                 anyoneGettingCloser = false;
 
-                for(CannonBall rocket : rockets) {
-                    if(rocket.isStillGettingCloser()) {
+                for(Rocket rocket : rockets) {
+                    if(rocket.cannonBall.isStillGettingCloser()) {
+                        rocket.timeMeta.travelTime = universe.getTimeSinceStart() - rocket.timeMeta.timeOffset;
+                        rocket.timeMeta.distance = end.getPosition().subtract(rocket.cannonBall.getPosition()).length();
                         anyoneGettingCloser = true;
                     }
-                    double distance = end.getPosition().subtract(rocket.getPosition()).length();
+                    double distance = end.getPosition().subtract(rocket.cannonBall.getPosition()).length();
                     if(distance < min_distance) {
                         min_distance = distance;
-                        closestRocket = rocket;
+                        closestRocket = rocket.cannonBall;
                     }
                 }
 
                 universe.update();
 
 
+            }
+
+            rockets.sort(new Comparator<Rocket>() {
+                @Override
+                public int compare(Rocket o1, Rocket o2) {
+                    return Double.compare(score(o1), score(o2));
+                }
+
+                public double score(Rocket rocket) {
+                    FuelTracker fuelTracker = new FuelTracker();
+                    fuelTracker.add(rocket.cannonBall.getMass(), rocket.cannonBall.getAcceleration().length() * TimeUnit.MINUTES.toSeconds(10));
+
+
+                    return fuelTracker.getUsage() / rocket.timeMeta.travelTime / (1D / rocket.timeMeta.distance);
+                }
+
+            });
+
+            for(Rocket rocket : rockets) {
+                FuelTracker fuelTracker = new FuelTracker();
+                fuelTracker.add(rocket.cannonBall.getMass(), rocket.cannonBall.getAcceleration().length() * TimeUnit.MINUTES.toSeconds(10));
+                System.out.printf("%e\t|%d\t|%e\t|\n", rocket.timeMeta.distance, TimeUnit.SECONDS.toDays((long) rocket.timeMeta.travelTime), fuelTracker.getUsage());
             }
 
             System.out.println(min_distance);
@@ -159,10 +184,24 @@ public class PathFinder {
 
         public Vector3 position;
         public double timeOffset;
+        public double travelTime;
+        public boolean savedTravelTime = false;
+        public double distance;
 
         public TimeMeta(Vector3 position, double timeOffset) {
             this.position = position;
             this.timeOffset = timeOffset;
+        }
+
+    }
+
+    public class Rocket {
+        public TimeMeta timeMeta;
+        public CannonBall cannonBall;
+
+        public Rocket(TimeMeta timeMeta, CannonBall cannonBall) {
+            this.timeMeta = timeMeta;
+            this.cannonBall = cannonBall;
         }
 
     }

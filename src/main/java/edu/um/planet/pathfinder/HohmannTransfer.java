@@ -43,6 +43,8 @@ public class HohmannTransfer {
         double time_titan_saturn = -1;
         double time_saturn_earth = -1;
 
+        boolean updatedUniverse = false;
+
         while (true) {
             fuel = fuel_fill;
             mass = dry_mass + fuel_fill;
@@ -53,7 +55,7 @@ public class HohmannTransfer {
             Result r = findVelocities(10, 399, 699, orbitalPeriodsEarth, orbitalPeriodsSaturn, rotationSpeedEarth, rotationSpeedSaturn);
             universe._LOOP_ITERATIONS = (int) (r.time * 86400);
             time_earth_saturn = r.time;
-            universe.update();
+            if(updatedUniverse) universe.update();
             //---
             updateFuelUsage(totalTracker.add(mass, r.firstPush));
             updateFuelUsage(totalTracker.add(mass, r.secondPush));
@@ -63,7 +65,8 @@ public class HohmannTransfer {
             r = findVelocities(699, 699, 606, orbitalPeriodsSaturn, orbitalPeriodTitan, rotationSpeedSaturn, rotationSpeedTitan);
             universe._LOOP_ITERATIONS = (int) (r.time * 86400);
             time_saturn_titan = r.time;
-            universe.update();
+            if(updatedUniverse) universe.update();
+
             //---
             updateFuelUsage(totalTracker.add(mass, r.firstPush));
             updateFuelUsage(totalTracker.add(mass, r.secondPush));
@@ -92,7 +95,8 @@ public class HohmannTransfer {
             r = findVelocities(699, 606, 699, orbitalPeriodTitan, orbitalPeriodsSaturn, rotationSpeedTitan, rotationSpeedSaturn);
             universe._LOOP_ITERATIONS = (int) (r.time * 86400);
             time_titan_saturn = r.time;
-            universe.update();
+            if(updatedUniverse) universe.update();
+
             //---
             updateFuelUsage(totalTracker.add(mass, r.firstPush));
             updateFuelUsage(totalTracker.add(mass, r.secondPush));
