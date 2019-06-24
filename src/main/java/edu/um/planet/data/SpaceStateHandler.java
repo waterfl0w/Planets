@@ -98,7 +98,7 @@ public class SpaceStateHandler {
             final long timeOffset = spaceFileMeta.getTimeOffset();
             final int objectsCount = spaceFileMeta.getObjectsCount();
 
-            // --- time the user wants to load
+            // --- timeInSeconds the user wants to load
             universeTime = Instant.ofEpochMilli(time + timeOffset * stepsOffset);
             System.out.println("Data@" + universeTime);
 

@@ -41,37 +41,4 @@ public class RungeKutta {
         return force;
     }
 
-    public static class Interval {
-
-        private final double a;
-        private final double b;
-
-        public Interval(double a, double b) {
-            assert a <= b;
-            this.a = a;
-            this.b = b;
-        }
-
-        public double a() {
-            return this.a;
-        }
-
-        public double b() {
-            return this.b;
-        }
-
-        public static Interval of(double a, double b) {
-            return new Interval(a, b);
-        }
-
-    }
-
-    public static interface RKFUnction {
-
-        double f(double t, double y);
-
-    }
-
-
-
 }

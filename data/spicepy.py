@@ -24,6 +24,6 @@ positions, lightTimes = spice.spkpos('612', times, 'J2000', 'NONE', '10')
 print("Positions: ")
 print(positions[0])
 
-# Light times is a N vector of time
+# Light times is a N vector of timeInSeconds
 print("Light Times: ")
 print(lightTimes[0])

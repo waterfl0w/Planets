@@ -1,6 +1,7 @@
 package edu.um.planet.physics;
 
 import edu.um.planet.Universe;
+import edu.um.planet.math.Interval;
 import edu.um.planet.math.RungeKutta;
 import edu.um.planet.math.Vector3;
 
@@ -11,7 +12,7 @@ import java.util.List;
 public class PhysicalObject implements Cloneable {
 
     public static boolean _USE_RUNGE_KUTTA = true;
-    private final static boolean enableGravity = true;
+    private final static boolean enableGravity = false;
 
     private int id;
     private String name;
@@ -71,9 +72,9 @@ public class PhysicalObject implements Cloneable {
 
         // force
         Vector3 sum = new Vector3();
-        if(!(this instanceof CannonBall)) {
+        if(!(this instanceof CannonBall) || enableGravity) {
             for (PhysicalObject other : objectList) {
-                if (this != other && !(other instanceof CannonBall)) {
+                if (this != other && (!(other instanceof CannonBall) || enableGravity)) {
                     // F = (GMm)/(r^2)
                     final double F = (Universe._G * this.getMass() * other.getMass()) / Math.pow(other.getPosition().subtract(this.getPosition()).length(), 2);
 
@@ -87,7 +88,7 @@ public class PhysicalObject implements Cloneable {
 
 
         if (_USE_RUNGE_KUTTA) {
-            Vector3[] vectors = RungeKutta.solve(this.velocity, this.position, RungeKutta.Interval.of(0, universe._TIME_DELTA), sum.divide(getMass()));
+            Vector3[] vectors = RungeKutta.solve(this.velocity, this.position, Interval.of(0, universe._TIME_DELTA), sum.divide(getMass()));
             this.velocity = vectors[1];
             this.position = vectors[0];
         } else {

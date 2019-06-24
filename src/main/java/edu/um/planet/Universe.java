@@ -37,7 +37,7 @@ public class Universe {
 
     // TODO
     //  1) Make a seperate PhysicalObject class and generalise concepts
-    //  1.1) Add dynamic time-steps. This seems to be required to updated super small objects (e.g. rockets and cannon balls) accurately!
+    //  1.1) Add dynamic timeInSeconds-steps. This seems to be required to updated super small objects (e.g. rockets and cannon balls) accurately!
     //  2) Add a rocket and a thruster system that can fire in 3D.
     //  2.1) Add acceleration to the rocket, so that we can properly launch (bonus).
     //  3) Add planet rotation
@@ -67,16 +67,24 @@ public class Universe {
     }
 
     public void save() {
-        // clone all physical objects & save current time
+        // clone all physical objects & save current timeInSeconds
         this.save_bodies.clear();
         this.bodies.forEach(o -> this.save_bodies.put(o.getId(), o.clone()));
         this.save_timestamp = Instant.ofEpochMilli(this.currentTime.toEpochMilli());
     }
 
     public void recover() {
-        // reset bodies & current time
+        // reset bodies & current timeInSeconds
         this.timeSinceStart = 0;
-        this.save_bodies.forEach((id, o) -> this.getCelestialBody(id).recover(o));
+        Iterator<PhysicalObject> iterator = this.bodies.iterator();
+        while (iterator.hasNext()) {
+            PhysicalObject physicalObject = iterator.next();
+            if(this.save_bodies.containsKey(physicalObject.getId())) {
+                this.getCelestialBody(physicalObject.getId()).recover(this.save_bodies.get(physicalObject.getId()));
+            } else {
+                iterator.remove();
+            }
+        }
         this.currentTime = Instant.ofEpochMilli(this.save_timestamp.toEpochMilli());
     }
 

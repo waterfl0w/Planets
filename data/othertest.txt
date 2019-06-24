@@ -1,6 +1,6 @@
 '''
 from astroquery.jplhorizons import Horizons
-from time import gmtime, strftime
+from timeInSeconds import gmtime, strftime
 
 indicies = [[199,-1,-1], [299,-1,-1], [399,301,301], [499,401,402], [599,501,560], [699,601,653], [799,701,729], [899,801,814], [999,901,905]]
 

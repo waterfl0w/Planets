@@ -50,6 +50,7 @@ public class ParticleSwarm {
             PhysicalObject spawn = universe.getCelestialBody(start);
             this.particles.add(new Particle(
                     new CannonBall(-i-1,
+                            HohmannTransfer.DRY_MASS,
                             universe.getCelestialBody(end),
                             spawn.getPosition().add(
                                     new Vector3(spawn.getRadius(), spawn.getRadius(), spawn.getRadius()).multiply(Vector3.randomNormalised()).multiply(Vector3.randomSigns())
@@ -144,7 +145,7 @@ public class ParticleSwarm {
         private Vector3 acceleration;
         private double error = Double.MAX_VALUE;
 
-        //--- The best data that has ever been associated with this particle in its life-time.
+        //--- The best data that has ever been associated with this particle in its life-timeInSeconds.
         private Vector3 best_position;
         private Vector3 best_acceleration;
         private double best_error;
@@ -180,11 +181,12 @@ public class ParticleSwarm {
 
             this.cannonBall = new CannonBall(
                     this.cannonBall.getId(),            // id
+                    HohmannTransfer.DRY_MASS,
                     universe.getCelestialBody(end),     // end object
                     this.position,                      // position @ start
                     spawn.getVelocity(),                // velocity @ start
                     this.acceleration,                  // acceleration @ start
-                    accelerationInSeconds               // time to accelerate the object in seconds
+                    accelerationInSeconds               // timeInSeconds to accelerate the object in seconds
             );
 
         }

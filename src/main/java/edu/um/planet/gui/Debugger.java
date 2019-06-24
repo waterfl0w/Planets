@@ -38,7 +38,7 @@ public class Debugger {
 
     public Debugger(Universe universe, boolean doSelfUpdates) {
         this.doSelfUpdates = doSelfUpdates;
-        SpaceStateHandler.populateCache();
+        //SpaceStateHandler.populateCache();
         //this.universe = SpaceStateHandler.get("10years_24h_steps.space", 365 * 5);
         // initial state
 
@@ -138,7 +138,7 @@ public class Debugger {
                     if(entry.getKey().endsWith("test.space")) {
                         SpaceStateHandler.SpaceFileMeta meta = entry.getValue();
                         Instant startTime = Instant.ofEpochMilli(meta.getStartTime());
-                        //TODO also check end time
+                        //TODO also check end timeInSeconds
                         if (jumpTo.isAfter(startTime)) {
                             int jumps = (int) (jumpTo.minusMillis(startTime.toEpochMilli()).toEpochMilli() / (double) meta.getTimeOffset());
                             this.debugger.universe = SpaceStateHandler.get(entry.getKey(), jumps);

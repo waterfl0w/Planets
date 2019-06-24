@@ -43,7 +43,7 @@ public class CannonBall extends PhysicalObject {
         this.target = target;
     }
 
-    public CannonBall(int id, PhysicalObject target, Vector3 position, Vector3 velocity, Vector3 acceleration, double accelerateInSeconds) {
+    public CannonBall(int id, double mass, PhysicalObject target, Vector3 position, Vector3 velocity, Vector3 acceleration, double accelerateInSeconds) {
         super(id, "Cannon Ball", Color.RED, 1, 300, position, velocity);
         this.setPosition(position);
         this.setVelocity(velocity);

@@ -1,6 +1,7 @@
-package edu.um.planet.math;
+package edu.um.planet.pathfinder;
 
 import edu.um.planet.Universe;
+import edu.um.planet.math.Vector3;
 
 public class SimulateAccelerationTime {
 

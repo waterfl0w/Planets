@@ -100,7 +100,7 @@ public class LandingModule {
 
     public void updateController() {
 
-        // --- update time
+        // --- update timeInSeconds
         this.time += TIME_STEP;
 
         final double distanceY = Math.abs(this.getPosition().getY());
@@ -113,7 +113,7 @@ public class LandingModule {
             if(!storedData) {
                 List<String> keys = new ArrayList<>(dataLogger.getData().get(dataLogger.getData().keySet().stream().findAny().get()).keySet());
                 StringBuilder header = new StringBuilder();
-                header.append("time,");
+                header.append("timeInSeconds,");
                 for(String key : keys) {
                     header.append(String.format("%s,", key));
                 }
@@ -286,7 +286,7 @@ public class LandingModule {
                 final double thrustDelta = maxThrust - Math.abs(aF);
                 positiveThruster.burn(Math.abs((thrustDelta) / positiveThruster.getForce()));
             }
-            // Are we too slow to get to x=0 in time? -> Accelerate
+            // Are we too slow to get to x=0 in timeInSeconds? -> Accelerate
             else if(timeToA <= (Math.abs(this.getVelocity().get(axis))/ negativeThruster.getForce())) {
                 negativeThruster.burn( negativeThruster.getForce() / Math.abs(((distanceToAxis / timeToA) / timeToA) - Math.abs(this.getVelocity().get(axis))));
             }
