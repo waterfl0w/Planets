@@ -10,13 +10,11 @@ import edu.um.planet.physics.PhysicalObject;
 import edu.um.planet.math.Vector3;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+
 import java.util.Comparator;
 import java.util.concurrent.TimeUnit;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class PathFinder {
@@ -54,21 +52,43 @@ public class PathFinder {
     }
 
     public void calculate() {
-        //--- Monthly --> Weekly
+        //--- Yearly --> Months
         universe.save();
 
-        List<Interval> monthly = simulateTimePeriod(0, TimeUnit.DAYS.toMinutes(7), 60, 10);
+        List<Result> yearly = simulateTimePeriod(0, TimeUnit.DAYS.toMinutes(365), 2, 8);
+        List<Result> monthly = new ArrayList<>();
+        for(Result result : yearly) {
+            Interval interval = result.interval;
+            double timeDelta = TimeUnit.DAYS.toMinutes(30);
+            int tests = (int) MathUtil.clamp(Interval.of(1, 12), (int) Math.ceil((interval.b() - interval.a()) / timeDelta));
+            monthly.addAll(simulateTimePeriod((long) interval.a(), timeDelta, tests, (int) Math.ceil(tests * 0.5)));
+        }
 
-        for(Interval interval : monthly) {
-            System.out.println(interval.a() + " -> " + ((interval.b() - interval.a()) / TimeUnit.DAYS.toMinutes(1)));
+        //--- Months --> Weeks
+        List<Result> weekly = new ArrayList<>();
+        for(Result result : monthly) {
+            Interval interval = result.interval;
+            double timeDelta = TimeUnit.DAYS.toMinutes(7);
+            int tests = (int) MathUtil.clamp(Interval.of(1, 4), (int) Math.ceil((interval.b() - interval.a()) / timeDelta));
+            weekly.addAll(simulateTimePeriod((long) interval.a(), timeDelta, tests, (int) (tests * 0.5)));
+        }
+
+        //--- Weeks -> Days
+        List<Result> days = new ArrayList<>();
+        for(Result result : monthly) {
+            Interval interval = result.interval;
             double timeDelta = TimeUnit.DAYS.toMinutes(1);
-            int tests = (int) MathUtil.clamp(Interval.of(1, 20), (int) Math.ceil((interval.b() - interval.a()) / timeDelta));
-            simulateTimePeriod((long) interval.a(), timeDelta, tests, (int) Math.ceil(tests * 0.3333));
+            int tests = (int) MathUtil.clamp(Interval.of(1, 7), (int) Math.ceil((interval.b() - interval.a()) / timeDelta));
+            days.addAll(simulateTimePeriod((long) interval.a(), timeDelta, tests, (int) (tests * 0.5)));
+        }
+
+        for (Result result : days) {
+            System.out.println(String.format("%e - %e - %e - %e (%.4f)", result.rocket.timeMeta.timeOffset, result.rocket.timeMeta.travelTime, result.rocket.timeMeta.distance, result.fuelUsage, result.fuelUsage / fuelConstraint));
         }
 
     }
 
-    public List<Interval> simulateTimePeriod(long simulationOffset, double timeDelta, int tests, int limit) {
+    public List<Result> simulateTimePeriod(long simulationOffset, double timeDelta, int tests, int limit) {
 
         //--- offset the simulation and save
         if(simulationOffset > 0) {
@@ -93,8 +113,6 @@ public class PathFinder {
             end = universe.getCelestialBody(end.getId());
             //rockets = spawnRockets(start.getPosition(), futurePoints);
         });
-
-
 
         boolean anyoneGettingCloser = true;
         boolean allLaunched = false;
@@ -177,13 +195,13 @@ public class PathFinder {
                 .filter(e -> e.timeMeta.travelTime < this.timeConstraint)
                 .limit(limit)
                 .sorted(Comparator.comparingDouble(o -> o.timeMeta.timeOffset)).collect(Collectors.toList());
-        List<Interval> intervals = new ArrayList<>();
+        List<Result> intervals = new ArrayList<>();
         for (int i = 0; i < sortedRockets.size() - 1; i++) {
             Rocket a = sortedRockets.get(i);
             Rocket b = sortedRockets.get(i+1);
-            if (a.timeMeta.travelTime > 1 && b.timeMeta.travelTime > 1) {
-                intervals.add(Interval.of(a.timeMeta.timeOffset, b.timeMeta.timeOffset));
-            }
+            FuelTracker fuelTracker = new FuelTracker();
+            fuelTracker.add(a.cannonBall.getMass(), a.cannonBall.getAcceleration().length() * TimeUnit.MINUTES.toSeconds(10));
+            intervals.add(new Result(a, fuelTracker.getUsage(), Interval.of(a.timeMeta.timeOffset, b.timeMeta.timeOffset)));
         }
 
         System.out.println(intervals.size());
@@ -192,34 +210,6 @@ public class PathFinder {
 
     }
 
-
-    private List<CannonBall> spawnRockets(Vector3 startPosition, List<TimeMeta> metas) {
-        List<CannonBall> rockets = new ArrayList<>();
-        double geo = 42164E3;
-        for(TimeMeta meta : metas) {
-            Vector3 distance = meta.position.subtract(startPosition);
-            Vector3 dir = distance.normalise();
-            double speed = distance.length() / meta.timeOffset / TimeUnit.MINUTES.toSeconds(10);
-
-            // int id, PhysicalObject target, Vector3 position, Vector3 velocity, Vector3 acceleration, double accelerateInSeconds
-            CannonBall rocket = new CannonBall(
-                    globalId,
-                    HohmannTransfer.DRY_MASS,
-                    geo,
-                    end,
-                    startPosition.add(dir.multiply(geo)),
-                    start.getVelocity(),
-                    dir.multiply(speed),
-                    TimeUnit.MINUTES.toSeconds(10)
-            );
-            System.out.println("add rocket");
-            rockets.add(rocket);
-            universe.getBodies().add(rocket);
-        }
-        globalId--;
-
-        return rockets;
-    }
 
     public class TimeMeta {
 
@@ -242,6 +232,20 @@ public class PathFinder {
         public Rocket(TimeMeta timeMeta, CannonBall cannonBall) {
             this.timeMeta = timeMeta;
             this.cannonBall = cannonBall;
+        }
+
+    }
+
+    public class Result {
+
+        public Interval interval;
+        public Rocket rocket;
+        public double fuelUsage;
+
+        public Result(Rocket rocket, double fuelUsage, Interval interval) {
+            this.interval = interval;
+            this.fuelUsage = fuelUsage;
+            this.rocket = rocket;
         }
 
     }
