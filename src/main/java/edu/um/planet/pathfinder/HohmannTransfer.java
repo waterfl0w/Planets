@@ -78,11 +78,11 @@ public class HohmannTransfer {
             System.out.println(r);
 
             // Landing
-            System.out.println("Landing...");
+            /*System.out.println("Landing...");
             LandingSimulator simulator = new LandingSimulator(true, new LandingModule(false,
                     LandingSimulator.TITAN_GRAVITY,
                     Vector3.randomNormalised().multiply(PathFinder.TITAN_GEO),
-                    universe.getCelestialBody(606).getVelocity().multiply(new Vector3(0.01, -0.01, 0.01)),
+                    universe.getCelestialBody(606).getVelocity().multiply(new Vector3(0.001, -0.01, 0.001)),
                     -Math.PI + 0.005,
                     0.1,
                     ControllerMode.CLOSED));
@@ -92,7 +92,7 @@ public class HohmannTransfer {
             mass -= usage;
             if(fuel < 0) {
                 fuel_fill += Math.abs(fuel);
-            }
+            }*/
 
 
             // Titan -> Saturn

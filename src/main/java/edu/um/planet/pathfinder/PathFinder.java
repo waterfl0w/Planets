@@ -22,7 +22,9 @@ import java.util.stream.Collectors;
 public class PathFinder {
 
     public static void main(String[] args) {
-        new PathFinder(EARTH_GEO);
+         HohmannTransfer.MinimalValues minimalValues = new HohmannTransfer().calculateMinimalFuelUsage();
+
+        new PathFinder(399, 606, TITAN_GEO, minimalValues.fuel * 0.75, minimalValues.timeInSeconds / 2.2D);
     }
 
     public final static double EARTH_GEO = 532E3;
@@ -30,16 +32,20 @@ public class PathFinder {
 
     //---
     private Universe universe = new Universe();
-    private PhysicalObject start = universe.getCelestialBody(606);
-    private PhysicalObject end = universe.getCelestialBody(301);
+    private PhysicalObject start;
+    private PhysicalObject end;
     private double geo;
 
     private int globalId = -1;
-    private final HohmannTransfer.MinimalValues minimalValues;
+    private double timeConstraint;
+    private double fuelConstraint;
 
-    public PathFinder(double geo) {
-        this.minimalValues = new HohmannTransfer().calculateMinimalFuelUsage();
+    public PathFinder(int start, int end, double geo, double timeConstraint, double fuelConstraint) {
         this.geo = geo;
+        this.start = universe.getCelestialBody(start);
+        this.end = universe.getCelestialBody(end);
+        this.timeConstraint = timeConstraint;
+        this.fuelConstraint = fuelConstraint;
 
         new Debugger(universe, false);
         universe._TIME_DELTA = 60;
@@ -165,10 +171,10 @@ public class PathFinder {
                 .filter(e -> {
                     FuelTracker fuelTracker = new FuelTracker();
                     fuelTracker.add(e.cannonBall.getMass(), e.cannonBall.getAcceleration().length() * TimeUnit.MINUTES.toSeconds(10));
-                    System.out.println(fuelTracker.getUsage() / minimalValues.fuel);
-                    return fuelTracker.getUsage() < (minimalValues.fuel * 0.75);
+                    System.out.println(fuelTracker.getUsage() / this.fuelConstraint);
+                    return fuelTracker.getUsage() < this.fuelConstraint;
                 })
-                .filter(e -> e.timeMeta.travelTime < 0.5 * minimalValues.timeInSeconds)
+                .filter(e -> e.timeMeta.travelTime < this.timeConstraint)
                 .limit(limit)
                 .sorted(Comparator.comparingDouble(o -> o.timeMeta.timeOffset)).collect(Collectors.toList());
         List<Interval> intervals = new ArrayList<>();

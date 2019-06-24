@@ -15,13 +15,19 @@ import java.util.Map;
 
 public class LandingModule {
 
+    //--- Data Logging
     private DataLogger dataLogger = new DataLogger();
     private FuelTracker fuelTracker = new FuelTracker();
+    private double time = 0;
+    private boolean storedData;
 
+    //--- Time step of the simulation IF it is using Newton's for the simulation, otherwise the rules for it apply.
     public static double TIME_STEP = 0.01;
 
+    //----
     private boolean isLanded = false;
 
+    //--- State of the module
     private Vector3 velocity;
     private Vector3 position;
 
@@ -32,11 +38,14 @@ public class LandingModule {
     private double theta; // rotation
     private double thetaVelocity;
 
+    //--- Properties and configuration
     private double mass = 10000;
-    private double height=2;
+    private double height= 2;
 
+    //--- Gravitational acceleration on the celestial body
     private final double gravityAcceleration;
 
+    //--- Thruster setup
     public Thruster downThruster = new Thruster(Direction.Y_POS, 400*10, mass);
     public Thruster leftThruster = new Thruster(Direction.X_POS, 200*25, mass);
     public Thruster rightThruster = new Thruster(Direction.X_NEG, 200*25, mass);
@@ -46,14 +55,22 @@ public class LandingModule {
     public RotationThruster leftRotation = new RotationThruster(Direction.X_NEG, 100, mass, Math.sqrt(2), height);
     public RotationThruster rightRotation = new RotationThruster(Direction.X_POS, 100, mass, Math.sqrt(2), height);
 
+    //--- Amount of turns it is allowed to do
     private int turns = 0;
 
+    //--- Controller type used for the landing
     private ControllerMode controllerMode;
 
-    //---
-    private double time = 0;
-    private boolean storedData;
-
+    /**
+     *
+     * @param storeData Should we store and write the data to disk.
+     * @param gravityAcceleration The gravitional acceleration of the celestial body.
+     * @param position The position of the module relative to the celestial body.
+     * @param velocity The velocity of the module.
+     * @param theta The rotation of the landing module along the x-axis.
+     * @param thetaVelocity The rotational velocity.
+     * @param controllerMode The controller mode used to land.
+     */
     public LandingModule(boolean storeData, double gravityAcceleration, Vector3 position, Vector3 velocity, double theta, double thetaVelocity, ControllerMode controllerMode) {
         this.storedData = !storeData; // kinda hacky...
         this.gravityAcceleration = gravityAcceleration;
@@ -67,39 +84,106 @@ public class LandingModule {
         this.thetaVelocity = thetaVelocity;
     }
 
+    /**
+     * Returns the fuel tracker.
+     * @return Never null.
+     */
     public FuelTracker getFuelTracker() {
         return this.fuelTracker;
     }
 
+    /**
+     * Checks if the module has landed.
+     * @return True, if it has landed, otherwise false.
+     */
     public boolean isLanded() {
         return isLanded;
     }
 
+    /**
+     * The rotation along the x-axis.
+     * @return Radians.
+     */
     public double getTheta() {
         return theta;
     }
 
+    /**
+     * The rotatioal velocity along the x-axis.
+     * @return Radians.
+     */
     public double getThetaVelocity() {
         return thetaVelocity;
     }
 
+    /**
+     * The real position of the module which might differ from what the controller knows.
+     * @return m/s
+     */
     public Vector3 getRealPositions() {
         return realPositions;
     }
 
+    /**
+     * The real position of the module which might differ from what the controller knows.
+     * @return m/s
+     */
     public Vector3 getRealVelocity() {
         return realVelocity;
     }
 
+    /**
+     * The position of the module that the module predicts.
+     * @return m
+     */
+    public Vector3 getPosition() {
+        return this.position;
+    }
+
+    /**
+     * The velocity of the module that the module predicts.
+     * @return m/s
+     */
+    public Vector3 getVelocity() {
+        return this.velocity;
+    }
+
+    /**
+     * Returns the rotation of the module along the x-axis.
+     * @return
+     */
+    public double getRotation() {
+        return this.theta;
+    }
+
+
+    /**
+     * The height and width of the module.
+     * @return m
+     */
     public double getHeight() {
         return height;
     }
 
+    /**
+     * Returns the data logger assocaited with the module.
+     * @return
+     */
+    public DataLogger getDataLogger() {
+        return this.dataLogger;
+    }
+
+    /**
+     * Updates the rotational angle along the x-axis.
+     * @param theta Angle in radians.
+     */
     public void setTheta(double theta) {
         this.theta = Math.atan2(Math.sin(theta), Math.cos(theta));
     }
 
-
+    /**
+     * Updates the controller.
+     */
     public void updateController() {
 
         // --- update timeInSeconds
@@ -265,6 +349,13 @@ public class LandingModule {
         }
     }
 
+    /**
+     * This is a generalisation method, and it can control and simulate all horizontal translation axis.
+     * @param axis The axis to simulate.
+     * @param positiveThruster The thruster facing the positive direction of the vehicle.
+     * @param negativeThruster The thruster facing the negative direction of the vehicle.
+     * @param yBreakingTime The time in seconds the rocket needs to come to a stop on the y axis.
+     */
     private void controlHorizontalAxis(Vector3.Component axis, Thruster positiveThruster, Thruster negativeThruster, double yBreakingTime) {
 
         double distanceToAxis = Math.abs(getPosition().get(axis));
@@ -317,15 +408,22 @@ public class LandingModule {
         }
     }
 
+    /**
+     * Updates the position of the landing module.
+     */
     public void updatePosition() {
 
+
+        //--- If it has landed, we no longer want to update its position.
         if(this.isLanded) return;
 
+        //--- Update the position the controller is aware of.
         this.position = this.position.add(this.velocity.mul(TIME_STEP));
         if(this.position.getY() < 0) {
             this.position = new Vector3(this.position.getX(), 0, this.position.getZ());
         }
 
+        //--- Update the real position of the landing module.
         this.realPositions = this.realPositions.add(this.realVelocity.mul(TIME_STEP));
         if(this.realPositions.getY() < 0) {
             this.realPositions = new Vector3(this.realPositions.getX(), 0, this.position.getZ());
@@ -335,8 +433,12 @@ public class LandingModule {
 
     }
 
+    /**
+     * Update the velocity of the landing module.
+     */
     public void updateVelocity() {
 
+        //--- If it has landed, we assume that it has come to a full stop.
         if(this.isLanded) {
             this.velocity = new Vector3();
             this.realVelocity = new Vector3();
@@ -354,8 +456,8 @@ public class LandingModule {
             dataLogger.add(this.time, "positionZ", position.getZ());
         }
 
-        double gForce = 0;
 
+        //--- Get thrust output from all thrusters
         Vector3 thrustTotal = new Vector3(0, 0, 0);
         {
             Vector3 thrust = applyRotation(downThruster.getThrust());
@@ -397,33 +499,29 @@ public class LandingModule {
         this.realVelocity = this.realVelocity.add(thrustTotal);
         this.velocity = this.velocity.add(thrustTotal);
 
-        gForce += thrustTotal.length();
-
         //--- Rotation
         {
             double totalRotation = 0;
             totalRotation += leftRotation.getThrust();
             totalRotation += rightRotation.getThrust();
             this.thetaVelocity += totalRotation;
-            gForce += Math.PI * 2 * height * totalRotation;
 
             this.fuelTracker.add(mass, totalRotation);
             dataLogger.add(this.time,"theta", theta);
             dataLogger.add(this.time, "thetaVelocity", thetaVelocity);
         }
 
-        //--- Wind
+        //--- Apply Wind
         Vector3 v = wind(getPosition(), mass).mul(TIME_STEP);
         dataLogger.add(this.time, "windStrength", v.getX());
         if(!Double.isNaN(v.getX())) {
-            gForce += v.length();
             if(this.controllerMode == ControllerMode.CLOSED) {
                 this.velocity = this.velocity.add(v);
             }
             this.realVelocity = this.realVelocity.add(v);
         }
 
-        //--- Drag
+        //--- Apply Drag
         if(this.controllerMode == ControllerMode.CLOSED) {
             Vector3 drag = drag(position, velocity, mass).mul(TIME_STEP);
             this.velocity = this.velocity.subtract(drag);
@@ -434,15 +532,13 @@ public class LandingModule {
         this.dataLogger.add(this.time, "realDrag", drag.length());
 
 
-        //--- Gravity
+        //--- Apply Gravity
         //v+1 = v + (Gv*m)/deltaY
         Vector3 gravity = new Vector3(0, gravityAcceleration, 0).mul(mass).div(Math.pow(1287850D-this.getPosition().getY(), 2)).mul(-1);
         this.realVelocity = this.realVelocity.add(gravity);
         this.velocity = this.velocity.add(gravity);
 
-        gForce += gravity.length();
-        //System.out.println("gforce: " + (gForce / 9.8));
-
+        //--- update burning time of all thrusters
         leftRotation.update();
         rightRotation.update();
         downThruster.update();
@@ -452,28 +548,25 @@ public class LandingModule {
         backThruster.update();
     }
 
+    /**
+     * Applies rotation to the module
+     * @param force The force acting upon each axis.
+     * @return Rotated force vector.
+     */
     private Vector3 applyRotation(Vector3 force) {
         return new Vector3(force.getX() * Math.cos(theta) - force.getY() * Math.sin(theta),
                 force.getX() * Math.sin(theta) + force.getY() * Math.cos(theta), force.getZ() * Math.cos(theta) - force.getY() * Math.sin(theta));
     }
 
-    public Vector3 getPosition() {
-        return this.position;
-    }
+    /**
+     * Calculates the pressure in Pascal based on the position of the module. This function is based on ESA data
+     * for titan.
+     * @param position Position of the module.
+     * @return Pressure in pascal.
+     */
+    private static double pressure(Vector3 position) {
 
-    public Vector3 getVelocity() {
-        return this.velocity;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("Module\n\tr:[p=%s,v=%s,θ=%.2f,θ'=%.2f]\n\ta:[p=%s,v=%s,θ=%.2f,θ'=%.2f]",
-                this.realPositions, this.realVelocity, Math.toDegrees(this.theta), Math.toDegrees(this.thetaVelocity),
-                this.position, this.velocity, Math.toDegrees(this.theta), Math.toDegrees(this.thetaVelocity));
-    }
-
-    public static double pressure(Vector3 position) {
-
+        // ESA only provided data for < 150km thus anything above cannot be modeled with high enough confidence.
         if(position.getY() < 0 || position.getY() > 150000) {
             return 0;
         }
@@ -483,7 +576,14 @@ public class LandingModule {
                 + -7.262E-05*position.getY() + 1.468;
     }
 
-    public Vector3 drag(Vector3 pos, Vector3 vel, double mass) {
+    /**
+     * Calculates the amount of drag the module experiences.
+     * @param pos The position of the module.
+     * @param vel The velocity of the module.
+     * @param mass The mass of the module.
+     * @return The drag forces it experiences.
+     */
+    private Vector3 drag(Vector3 pos, Vector3 vel, double mass) {
 
         final double pressure = pressure(pos);
 
@@ -504,7 +604,14 @@ public class LandingModule {
         return drag;
     }
 
-    public static Vector3 wind(Vector3 pos, double mass) {
+    /**
+     * Calculates the find force at a certain position, and the acceleration and object with a certain mass experiences at that
+     * point.
+     * @param pos The position of the object.
+     * @param mass The weight of the object.
+     * @return The forces it experiences on each axis.
+     */
+    private static Vector3 wind(Vector3 pos, double mass) {
 
         double temperature = 0;
 
@@ -548,11 +655,10 @@ public class LandingModule {
 
     }
 
-    public DataLogger getDataLogger() {
-        return this.dataLogger;
-    }
-
-    public double getRotation() {
-        return this.theta;
+    @Override
+    public String toString() {
+        return String.format("Module\n\tr:[p=%s,v=%s,θ=%.2f,θ'=%.2f]\n\ta:[p=%s,v=%s,θ=%.2f,θ'=%.2f]",
+                this.realPositions, this.realVelocity, Math.toDegrees(this.theta), Math.toDegrees(this.thetaVelocity),
+                this.position, this.velocity, Math.toDegrees(this.theta), Math.toDegrees(this.thetaVelocity));
     }
 }

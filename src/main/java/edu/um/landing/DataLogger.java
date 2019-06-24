@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * DataLogger is used to track flight data.
+ */
 public class DataLogger {
 
     public Map<Double, Map<String, Double>> data = new LinkedHashMap<>();

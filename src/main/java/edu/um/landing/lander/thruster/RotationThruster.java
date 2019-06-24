@@ -4,6 +4,10 @@ import edu.um.landing.lander.Direction;
 import edu.um.planet.math.Vector3;
 import edu.um.landing.lander.LandingModule;
 
+/**
+ * This thruster is position so that it is offset from the rotational axis, thus it is able to apply torque to the body
+ * it has been attached to.
+ */
 public class RotationThruster extends IThruster<Double, Double> {
 
     private final double r;

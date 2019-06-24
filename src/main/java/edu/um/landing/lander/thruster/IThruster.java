@@ -3,6 +3,11 @@ package edu.um.landing.lander.thruster;
 import edu.um.landing.lander.Direction;
 import edu.um.landing.lander.LandingModule;
 
+/**
+ * This is a general thruster interface which defines what the module expects from a thruster.
+ * @param <F> Return unit of acceleration.
+ * @param <T> Return unit of force.
+ */
 public abstract class IThruster<F,T> {
 
     private Direction direction;
