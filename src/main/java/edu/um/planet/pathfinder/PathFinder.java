@@ -67,8 +67,8 @@ public class PathFinder {
             universe._TIME_DELTA = 60 * 30;
             final AtomicInteger launchIndex = new AtomicInteger(0);
 
-            final long timing = TimeUnit.DAYS.toSeconds(1);
-            long timeToNextStart = timing;
+            final double timing = timeDelta;
+            double timeToNextStart = timing;
 
             while (anyoneGettingCloser || !allLaunched){
                 timeToNextStart -= universe.getUpdateStep();

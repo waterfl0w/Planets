@@ -8,6 +8,7 @@ import java.util.List;
 
 public class CannonBall extends PhysicalObject {
 
+
     private Vector3 acceleration;
     private Vector3 targetCoordinate;
     private double accelerateInSeconds = 20 * 60;
@@ -72,6 +73,7 @@ public class CannonBall extends PhysicalObject {
 
         if(this.target.getPosition().subtract(this.getPosition()).multiply(1D / universe._TIME_DELTA).length()-target.getRadius() < getVelocity().length()) {
             this.setVelocity(this.target.getVelocity());
+            this.setPosition(this.target.getPosition().add(this.target.getRadius() * 1.2));
             isHit = true;
             System.out.println("hti");
         } else if(accelerateInSeconds > 0) {
