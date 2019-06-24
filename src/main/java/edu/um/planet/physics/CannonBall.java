@@ -12,8 +12,11 @@ public class CannonBall extends PhysicalObject {
     private Vector3 acceleration;
     private Vector3 targetCoordinate;
     private double accelerateInSeconds = 20 * 60;
+
+    //---target
     private boolean isHit;
     private PhysicalObject target;
+    private double geo;
 
     // TODO/NOTE: Does the probe still get closer? This is specific to the particle swarm implementation but should work
     //  in general as well... not guaranteed tho...
@@ -43,8 +46,10 @@ public class CannonBall extends PhysicalObject {
         this.target = target;
     }
 
-    public CannonBall(int id, double mass, PhysicalObject target, Vector3 position, Vector3 velocity, Vector3 acceleration, double accelerateInSeconds) {
-        super(id, "Cannon Ball", Color.RED, 1, 300, position, velocity);
+    public CannonBall(int id, double mass, double geo, PhysicalObject target, Vector3 position, Vector3 velocity, Vector3 acceleration, double accelerateInSeconds) {
+        super(id, "Cannon Ball", Color.RED, 1, mass, position, velocity);
+        assert geo > 0;
+        this.geo = geo;
         this.setPosition(position);
         this.setVelocity(velocity);
         this.target = target;
@@ -71,11 +76,10 @@ public class CannonBall extends PhysicalObject {
         }
         //---
 
-        if(this.target.getPosition().subtract(this.getPosition()).multiply(1D / universe._TIME_DELTA).length()-target.getRadius() < getVelocity().length()) {
+        if(!isHit && this.target.getPosition().subtract(this.getPosition()).multiply(1D / universe._TIME_DELTA).length()-target.getRadius() < getVelocity().length()) {
             this.setVelocity(this.target.getVelocity());
-            this.setPosition(this.target.getPosition().add(this.target.getRadius() * 1.2));
+            this.setPosition(this.target.getPosition().add(this.getPosition().dir(this.target.getPosition()).negate().multiply(geo)));
             isHit = true;
-            System.out.println("hti");
         } else if(accelerateInSeconds > 0) {
             // update velocity v(t+1)=v(t) + dT * a
             Vector3 velocity = this.getVelocity();

@@ -1,7 +1,11 @@
 package edu.um.planet.pathfinder;
 
 import edu.um.landing.FuelTracker;
+import edu.um.landing.LandingSimulator;
+import edu.um.landing.lander.ControllerMode;
+import edu.um.landing.lander.LandingModule;
 import edu.um.planet.Universe;
+import edu.um.planet.math.Vector3;
 import edu.um.planet.physics.PhysicalObject;
 
 import java.util.concurrent.TimeUnit;
@@ -74,10 +78,10 @@ public class HohmannTransfer {
             System.out.println(r);
 
             // Landing
-            /*System.out.println("Landing...");
-            double geostationary_orbit_end = Math.pow((Universe._G * universe.getCelestialBody(606).getMass() * Math.pow(rotationSpeedTitan, 2)) / (4 * Math.pow(PI, 2)), 1D / 3);
-            Simulator simulator = new Simulator(true, new LandingModule(false,
-                    new Vector3(Math.random(), 1, Math.random()).multiply(geostationary_orbit_end),
+            System.out.println("Landing...");
+            LandingSimulator simulator = new LandingSimulator(true, new LandingModule(false,
+                    LandingSimulator.TITAN_GRAVITY,
+                    Vector3.randomNormalised().multiply(PathFinder.TITAN_GEO),
                     universe.getCelestialBody(606).getVelocity().multiply(new Vector3(0.01, -0.01, 0.01)),
                     -Math.PI + 0.005,
                     0.1,
@@ -88,7 +92,7 @@ public class HohmannTransfer {
             mass -= usage;
             if(fuel < 0) {
                 fuel_fill += Math.abs(fuel);
-            }*/
+            }
 
 
             // Titan -> Saturn

@@ -13,10 +13,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
-public class Simulator {
+public class LandingSimulator {
+
+    public final static double TITAN_GRAVITY = 1.352;
+    public final static double EARTH_GRAVITY = 9.807;
 
     public static void main(String[] args) {
-        new Simulator(true, new LandingModule(false, new Vector3(-12000,  3E5 , 10000),
+        new LandingSimulator(true, new LandingModule(false, EARTH_GRAVITY, new Vector3(-12000,  3E5 , 10000),
                 new Vector3(120, -30, -120),
                 -Math.PI+0.005,
                 0.1,
@@ -44,7 +47,7 @@ public class Simulator {
 
     //private UI ui = new UI();
     private JFrame wrapper;
-    public Simulator(boolean headless, LandingModule landingModule) {
+    public LandingSimulator(boolean headless, LandingModule landingModule) {
         this.landingModule = landingModule;
         this.headless = headless;
         if(!headless) {

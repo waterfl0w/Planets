@@ -22,20 +22,24 @@ import java.util.stream.Collectors;
 public class PathFinder {
 
     public static void main(String[] args) {
-        new PathFinder();
+        new PathFinder(EARTH_GEO);
     }
 
+    public final static double EARTH_GEO = 532E3;
+    public final static double TITAN_GEO = 343E3;
+
     //---
-    private final static double geo = 42164E3;
     private Universe universe = new Universe();
-    private PhysicalObject start = universe.getCelestialBody(399);
-    private PhysicalObject end = universe.getCelestialBody(606);
+    private PhysicalObject start = universe.getCelestialBody(606);
+    private PhysicalObject end = universe.getCelestialBody(301);
+    private double geo;
 
     private int globalId = -1;
     private final HohmannTransfer.MinimalValues minimalValues;
 
-    public PathFinder() {
+    public PathFinder(double geo) {
         this.minimalValues = new HohmannTransfer().calculateMinimalFuelUsage();
+        this.geo = geo;
 
         new Debugger(universe, false);
         universe._TIME_DELTA = 60;
@@ -47,7 +51,7 @@ public class PathFinder {
         //--- Monthly --> Weekly
         universe.save();
 
-        List<Interval> monthly = simulateTimePeriod(0, TimeUnit.DAYS.toMinutes(7), 30, 10);
+        List<Interval> monthly = simulateTimePeriod(0, TimeUnit.DAYS.toMinutes(7), 60, 10);
 
         for(Interval interval : monthly) {
             System.out.println(interval.a() + " -> " + ((interval.b() - interval.a()) / TimeUnit.DAYS.toMinutes(1)));
@@ -107,6 +111,7 @@ public class PathFinder {
                         CannonBall rocket = new CannonBall(
                                 globalId,
                                 HohmannTransfer.DRY_MASS,
+                                geo,
                                 end,
                                 startPosition.add(dir.multiply(geo)),
                                 start.getVelocity().multiply(0),
@@ -160,8 +165,10 @@ public class PathFinder {
                 .filter(e -> {
                     FuelTracker fuelTracker = new FuelTracker();
                     fuelTracker.add(e.cannonBall.getMass(), e.cannonBall.getAcceleration().length() * TimeUnit.MINUTES.toSeconds(10));
+                    System.out.println(fuelTracker.getUsage() / minimalValues.fuel);
                     return fuelTracker.getUsage() < (minimalValues.fuel * 0.75);
                 })
+                .filter(e -> e.timeMeta.travelTime < 0.5 * minimalValues.timeInSeconds)
                 .limit(limit)
                 .sorted(Comparator.comparingDouble(o -> o.timeMeta.timeOffset)).collect(Collectors.toList());
         List<Interval> intervals = new ArrayList<>();
@@ -173,8 +180,8 @@ public class PathFinder {
             }
         }
 
+        System.out.println(intervals.size());
         universe.recover(); // recovery before going on
-
         return intervals;
 
     }
@@ -192,6 +199,7 @@ public class PathFinder {
             CannonBall rocket = new CannonBall(
                     globalId,
                     HohmannTransfer.DRY_MASS,
+                    geo,
                     end,
                     startPosition.add(dir.multiply(geo)),
                     start.getVelocity(),
@@ -207,16 +215,11 @@ public class PathFinder {
         return rockets;
     }
 
-    private Vector3 direction(PhysicalObject start, PhysicalObject target) {
-        return target.getPosition().subtract(start.getPosition()).normalise();
-    }
-
     public class TimeMeta {
 
         public Vector3 position;
         public double timeOffset;
         public double travelTime;
-        public boolean savedTravelTime = false;
         public double distance;
 
         public TimeMeta(Vector3 position, double timeOffset) {

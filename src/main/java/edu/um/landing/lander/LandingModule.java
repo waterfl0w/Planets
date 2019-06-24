@@ -19,7 +19,6 @@ public class LandingModule {
     private FuelTracker fuelTracker = new FuelTracker();
 
     public static double TIME_STEP = 0.01;
-    private final static double GRAVITY = 1.352; //0.01352m/s^2
 
     private boolean isLanded = false;
 
@@ -35,6 +34,8 @@ public class LandingModule {
 
     private double mass = 10000;
     private double height=2;
+
+    private final double gravityAcceleration;
 
     public Thruster downThruster = new Thruster(Direction.Y_POS, 400*10, mass);
     public Thruster leftThruster = new Thruster(Direction.X_POS, 200*25, mass);
@@ -53,8 +54,9 @@ public class LandingModule {
     private double time = 0;
     private boolean storedData;
 
-    public LandingModule(boolean storeData, Vector3 position, Vector3 velocity, double theta, double thetaVelocity, ControllerMode controllerMode) {
+    public LandingModule(boolean storeData, double gravityAcceleration, Vector3 position, Vector3 velocity, double theta, double thetaVelocity, ControllerMode controllerMode) {
         this.storedData = !storeData; // kinda hacky...
+        this.gravityAcceleration = gravityAcceleration;
         this.realVelocity = velocity;
         this.realPositions = position;
         this.controllerMode = controllerMode;
@@ -434,7 +436,7 @@ public class LandingModule {
 
         //--- Gravity
         //v+1 = v + (Gv*m)/deltaY
-        Vector3 gravity = new Vector3(0, GRAVITY, 0).mul(mass).div(Math.pow(1287850D-this.getPosition().getY(), 2)).mul(-1);
+        Vector3 gravity = new Vector3(0, gravityAcceleration, 0).mul(mass).div(Math.pow(1287850D-this.getPosition().getY(), 2)).mul(-1);
         this.realVelocity = this.realVelocity.add(gravity);
         this.velocity = this.velocity.add(gravity);
 

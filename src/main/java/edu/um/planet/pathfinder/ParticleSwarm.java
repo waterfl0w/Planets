@@ -51,6 +51,7 @@ public class ParticleSwarm {
             this.particles.add(new Particle(
                     new CannonBall(-i-1,
                             HohmannTransfer.DRY_MASS,
+                            -1,
                             universe.getCelestialBody(end),
                             spawn.getPosition().add(
                                     new Vector3(spawn.getRadius(), spawn.getRadius(), spawn.getRadius()).multiply(Vector3.randomNormalised()).multiply(Vector3.randomSigns())
@@ -182,6 +183,7 @@ public class ParticleSwarm {
             this.cannonBall = new CannonBall(
                     this.cannonBall.getId(),            // id
                     HohmannTransfer.DRY_MASS,
+                    -1,
                     universe.getCelestialBody(end),     // end object
                     this.position,                      // position @ start
                     spawn.getVelocity(),                // velocity @ start

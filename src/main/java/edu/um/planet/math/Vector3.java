@@ -112,6 +112,10 @@ public class Vector3 implements Cloneable {
         return b.subtract(this).normalise();
     }
 
+    public Vector3 negate() {
+        return new Vector3(-this.x, -this.y, -this.z);
+    }
+
     @Override
     public Vector3 clone() {
         return new Vector3(this.x, this.y, this.z);

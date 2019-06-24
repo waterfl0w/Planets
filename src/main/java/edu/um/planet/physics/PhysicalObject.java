@@ -74,7 +74,7 @@ public class PhysicalObject implements Cloneable {
         Vector3 sum = new Vector3();
         if(!(this instanceof CannonBall) || enableGravity) {
             for (PhysicalObject other : objectList) {
-                if (this != other && (!(other instanceof CannonBall) || enableGravity)) {
+                if (this != other && (!(other instanceof CannonBall))) {
                     // F = (GMm)/(r^2)
                     final double F = (Universe._G * this.getMass() * other.getMass()) / Math.pow(other.getPosition().subtract(this.getPosition()).length(), 2);
 
