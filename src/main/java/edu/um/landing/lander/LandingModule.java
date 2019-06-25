@@ -189,6 +189,10 @@ public class LandingModule {
         // --- update timeInSeconds
         this.time += TIME_STEP;
 
+        if((this.time % (TIME_STEP * 10)) == 0) {
+            System.out.println(this);
+        }
+
         final double distanceY = Math.abs(this.getPosition().getY());
 
         if(distanceY < 1E-3) {
@@ -325,13 +329,13 @@ public class LandingModule {
             }
         }
         if(((yToZero + halfToZero + timeToX + timeToZ) * 2 < timeToY)
-                && (this.getPosition().mul(new Vector3(1, 0, 1)).length() < 1)
-                && this.getVelocity().mul(new Vector3(1, 0, 1)).length() < 0.5
+                && (this.getPosition().multiply(new Vector3(1, 0, 1)).length() < 1)
+                && this.getVelocity().multiply(new Vector3(1, 0, 1)).length() < 0.5
 
         ) {
             if(Math.abs(targetTheta - Math.PI) <= Math.toRadians(1)) {
                 this.downThruster.burn(TIME_STEP);
-            } else if(turns > 0 && this.getVelocity().mul(new Vector3(1, 0, 1)).length() < 1) {
+            } else if(turns > 0 && this.getVelocity().multiply(new Vector3(1, 0, 1)).length() < 1) {
                 turns--;
                 //System.out.println("ROTATE");
                 this.targetTheta = Math.toRadians(179.5);
@@ -372,7 +376,7 @@ public class LandingModule {
 
         if (aV > velocityLimit) { //moving right
             // Do we overstep in the next update?
-            if (this.getPosition().add(this.velocity.mul(TIME_STEP)).get(axis) > 0) {
+            if (this.getPosition().add(this.velocity.multiply(TIME_STEP)).get(axis) > 0) {
                 negativeThruster.burn(Math.abs(aF / (negativeThruster.getForce())));
             } else if (this.getVelocity().get(axis) / (negativeThruster.getForce()) <= TIME_STEP) {
                 final double maxThrust = (negativeThruster.getForce());
@@ -388,7 +392,7 @@ public class LandingModule {
                 positiveThruster.burn(positiveThruster.getForce() / Math.abs(((distanceToAxis / yBreakingTime) / yBreakingTime) - Math.abs(this.getVelocity().get(axis))));
             }
         } else if (aV < -velocityLimit) { //moving left
-            if (this.getPosition().add(this.velocity.mul(TIME_STEP)).get(axis) < 0) {
+            if (this.getPosition().add(this.velocity.multiply(TIME_STEP)).get(axis) < 0) {
                 positiveThruster.burn(Math.abs(aF / (positiveThruster.getForce())));
             } else if (Math.abs(this.getVelocity().get(axis)) / (positiveThruster.getForce()) <=  TIME_STEP) {
                 final double maxThrust = (positiveThruster.getForce());
@@ -413,18 +417,19 @@ public class LandingModule {
      */
     public void updatePosition() {
 
-
         //--- If it has landed, we no longer want to update its position.
         if(this.isLanded) return;
 
+        this.fuelTracker.add(mass, velocity.length() * TIME_STEP);
+
         //--- Update the position the controller is aware of.
-        this.position = this.position.add(this.velocity.mul(TIME_STEP));
+        this.position = this.position.add(this.velocity.multiply(TIME_STEP));
         if(this.position.getY() < 0) {
             this.position = new Vector3(this.position.getX(), 0, this.position.getZ());
         }
 
         //--- Update the real position of the landing module.
-        this.realPositions = this.realPositions.add(this.realVelocity.mul(TIME_STEP));
+        this.realPositions = this.realPositions.add(this.realVelocity.multiply(TIME_STEP));
         if(this.realPositions.getY() < 0) {
             this.realPositions = new Vector3(this.realPositions.getX(), 0, this.position.getZ());
         }
@@ -512,7 +517,7 @@ public class LandingModule {
         }
 
         //--- Apply Wind
-        Vector3 v = wind(getPosition(), mass).mul(TIME_STEP);
+        Vector3 v = wind(getPosition(), mass).multiply(TIME_STEP);
         dataLogger.add(this.time, "windStrength", v.getX());
         if(!Double.isNaN(v.getX())) {
             if(this.controllerMode == ControllerMode.CLOSED) {
@@ -523,18 +528,18 @@ public class LandingModule {
 
         //--- Apply Drag
         if(this.controllerMode == ControllerMode.CLOSED) {
-            Vector3 drag = drag(position, velocity, mass).mul(TIME_STEP);
+            Vector3 drag = drag(position, velocity, mass).multiply(TIME_STEP);
             this.velocity = this.velocity.subtract(drag);
             this.dataLogger.add(this.time, "drag", drag.length());
         }
-        Vector3 drag = drag(realPositions, realVelocity, mass).mul(TIME_STEP);
+        Vector3 drag = drag(realPositions, realVelocity, mass).multiply(TIME_STEP);
         this.realVelocity = this.realVelocity.subtract(drag);
         this.dataLogger.add(this.time, "realDrag", drag.length());
 
 
         //--- Apply Gravity
         //v+1 = v + (Gv*m)/deltaY
-        Vector3 gravity = new Vector3(0, gravityAcceleration, 0).mul(mass).div(Math.pow(1287850D-this.getPosition().getY(), 2)).mul(-1);
+        Vector3 gravity = new Vector3(0, gravityAcceleration, 0).multiply(mass).divide(Math.pow(1287850D-this.getPosition().getY(), 2)).multiply(-1);
         this.realVelocity = this.realVelocity.add(gravity);
         this.velocity = this.velocity.add(gravity);
 
@@ -595,7 +600,7 @@ public class LandingModule {
                 (0.5 * 12.25 * 1 * vel.getX() * 1.1 * height * height),
                 0,
                 (0.5 * 12.25 * 1 * vel.getZ() * 1.1 * height * height)
-        ).div(mass);
+        ).divide(mass);
 
         if(drag.length() < 1E-5) {
             return new Vector3();
@@ -651,7 +656,7 @@ public class LandingModule {
             dir = new Vector3(1,0,0);
         }
 
-        return dir.mul(adjustedSpeed).div(mass * 10);
+        return dir.multiply(adjustedSpeed).divide(mass * 10);
 
     }
 

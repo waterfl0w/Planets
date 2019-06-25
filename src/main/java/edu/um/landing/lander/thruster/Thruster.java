@@ -29,7 +29,7 @@ public class Thruster extends IThruster<Double, Vector3> {
     public Vector3 getThrust() {
         Vector3 v = new Vector3(0, 0, 0);
         if(isBurning()) {
-            v = getDirection().direction().mul(getRawForce()).mul(Math.min(LandingModule.TIME_STEP, getTimeToBurn())).div(getMass());
+            v = getDirection().direction().multiply(getRawForce()).multiply(Math.min(LandingModule.TIME_STEP, getTimeToBurn())).divide(getMass());
         }
         return v;
     }
@@ -38,7 +38,7 @@ public class Thruster extends IThruster<Double, Vector3> {
     public Vector3 getNewton() {
         Vector3 v = new Vector3(0, 0, 0);
         if(isBurning()) {
-            v = getDirection().direction().mul(getRawForce()).mul(Math.min(LandingModule.TIME_STEP, getTimeToBurn()));
+            v = getDirection().direction().multiply(getRawForce()).multiply(Math.min(LandingModule.TIME_STEP, getTimeToBurn()));
         }
         return v;
     }

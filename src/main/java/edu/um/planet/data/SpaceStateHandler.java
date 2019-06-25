@@ -11,6 +11,12 @@ import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.List;
 
+/**
+ * We have noticed that our simulation can sometimes be to slowly, especially if we want to go to certain points in time.
+ * In order to solve this problem, we have developed our own file format which is easily parsable and only requires a minimum
+ * amount of memory if we want to load a certain point in time, since the file is divided up equally, so finding the right
+ * offset is a matter of simple arithmetic.
+ */
 public class SpaceStateHandler {
 
 
@@ -21,14 +27,28 @@ public class SpaceStateHandler {
     private final static File SPACE_FOLDER = new File("res/states");
     private final static Map<String, SpaceFileMeta> cache = new HashMap<>();
 
+    /**
+     * The size of the file header.
+     */
     private final static int HEADER_SIZE = Long.BYTES + Long.BYTES + Integer.BYTES + Integer.BYTES;
+    /**
+     * The size in bytes of storing a single physical object and its associated values (e.g. velocity, position, etc...)
+     */
     private final static int PHYSICAL_OBJECT_SIZE = 68;
+    /**
+     * The size of the id in bytes (integer) thus 4 bytes.
+     */
     private final static int ID_SIZE = 4;
 
     public static Map<String, SpaceFileMeta> getCache() {
         return cache;
     }
 
+    /**
+     * Creates a new '.space' file by simulating the universe with 24h steps for a certain amount of days.
+     * @param fileName The name of the final state file.
+     * @param days The amount of days it should simulate.
+     */
     public static void universeToFileSection(String fileName, int days) {
         Universe universe = new Universe();
         universe._TIME_DELTA = 10;
@@ -79,6 +99,12 @@ public class SpaceStateHandler {
         }
     }
 
+    /**
+     * This returns a universe at a certain time.
+     * @param fileName File path to the state file.
+     * @param stepsOffset Time offset.
+     * @return Universe after the offset.
+     */
     public static Universe get(String fileName, int stepsOffset) {
 
         List<PhysicalObject> objectList = new LinkedList<>();

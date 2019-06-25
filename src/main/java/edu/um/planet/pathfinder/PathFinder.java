@@ -23,8 +23,8 @@ public class PathFinder {
     public static void main(String[] args) {
          HohmannTransfer.MinimalValues minimalValues = new HohmannTransfer().calculateMinimalFuelUsage();
 
-        new PathFinder(399, 606, TITAN_GEO, minimalValues.timeInSeconds / 2.1D, minimalValues.fuel * 0.75, 0);
-        //new PathFinder(606, 399, EARTH_GEO, minimalValues.timeInSeconds - (63072000 * 1.5), minimalValues.fuel * (0.5352), (3.153600e+07 - 3.153600e+07));
+        //new PathFinder(399, 606, TITAN_GEO, minimalValues.timeInSeconds / 2.1D, minimalValues.fuel * 0.75, 0);
+        new PathFinder(606, 399, EARTH_GEO, minimalValues.timeInSeconds, minimalValues.fuel, (3.153600e+07 - 3.153600e+07));
     }
 
     public final static double EARTH_GEO = 532E3;

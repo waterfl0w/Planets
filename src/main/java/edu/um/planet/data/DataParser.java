@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * This class is used to parse data from JPL's Horizons service.
+ */
 public class DataParser {
 
     private final static OkHttpClient client = new OkHttpClient();

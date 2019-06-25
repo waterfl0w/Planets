@@ -176,7 +176,7 @@ public class ParticleSwarm {
         public void updateState(Particle swarmBest) {
 
             this.position = position.add(swarmBest.getPosition()).add(best_position);
-            this.acceleration = acceleration.add(swarmBest.getAcceleration().div(swarmBest.getBall().getMass())).add(best_acceleration);
+            this.acceleration = acceleration.add(swarmBest.getAcceleration().divide(swarmBest.getBall().getMass())).add(best_acceleration);
 
             PhysicalObject spawn = universe.getCelestialBody(start);
 

@@ -3,6 +3,7 @@ package edu.um.landing;
 import edu.um.landing.lander.ControllerMode;
 import edu.um.landing.lander.LandingModule;
 import edu.um.planet.math.Vector3;
+import edu.um.planet.pathfinder.PathFinder;
 import org.knowm.xchart.*;
 
 import javax.imageio.ImageIO;
@@ -12,6 +13,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Vector;
 
 public class LandingSimulator {
 
@@ -19,11 +21,12 @@ public class LandingSimulator {
     public final static double EARTH_GRAVITY = 9.807;
 
     public static void main(String[] args) {
-        new LandingSimulator(true, new LandingModule(false, EARTH_GRAVITY, new Vector3(-12000,  3E5 , 10000),
-                new Vector3(120, -30, -120),
+        LandingSimulator landingSimulator = new LandingSimulator(true, new LandingModule(false, TITAN_GRAVITY, new Vector3(-1, 1, 1).multiply(PathFinder.TITAN_GEO),
+                new Vector3(12, -30, -30),
                 -Math.PI+0.005,
                 0.1,
                 ControllerMode.CLOSED));
+        System.out.println("Landing fuel: " + ( landingSimulator.getLandingModule().getFuelTracker().getUsage() / FuelTracker.FUEL_MASS_DENSITY * FuelTracker.FUEL_PRICE_PER_LITRE));
     }
 
     //---

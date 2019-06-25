@@ -29,14 +29,14 @@ public class RotationThruster extends IThruster<Double, Double> {
 
     @Override
     public Double getForce() {
-        return getDirection().direction().mul(getRawForce()).div(getMass()).div(r).mul(Math.pow(h, 4) / 12D).getX();
+        return getDirection().direction().multiply(getRawForce()).divide(getMass()).divide(r).multiply(Math.pow(h, 4) / 12D).getX();
     }
 
     @Override
     public Double getThrust() {
         Vector3 t = new Vector3();
         if(isBurning()) {
-            t = getDirection().direction().mul(getRawForce()).div(getMass()).div(r).mul(Math.pow(h, 4) / 12D).mul(Math.min(LandingModule.TIME_STEP, getTimeToBurn()));
+            t = getDirection().direction().multiply(getRawForce()).divide(getMass()).divide(r).multiply(Math.pow(h, 4) / 12D).multiply(Math.min(LandingModule.TIME_STEP, getTimeToBurn()));
         }
         return t.getX();
     }
@@ -45,7 +45,7 @@ public class RotationThruster extends IThruster<Double, Double> {
     public Double getNewton() {
         Vector3 t = new Vector3();
         if(isBurning()) {
-            t = getDirection().direction().mul(getRawForce()).div(r).mul(Math.pow(h, 4) / 12D).mul(Math.min(LandingModule.TIME_STEP, getTimeToBurn()));
+            t = getDirection().direction().multiply(getRawForce()).divide(r).multiply(Math.pow(h, 4) / 12D).multiply(Math.min(LandingModule.TIME_STEP, getTimeToBurn()));
         }
         return t.getX();
     }

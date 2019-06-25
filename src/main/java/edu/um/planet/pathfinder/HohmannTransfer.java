@@ -121,7 +121,7 @@ public class HohmannTransfer {
 
         System.out.println(String.format("Dry mass: %e | Fueled Mass: %e | Fuel (t): %e | Fuel Price (%.2f/l): %.2fUSD",
                 DRY_MASS, DRY_MASS + totalTracker.getUsage(), totalTracker.getUsage() / 1000,
-                FuelTracker.FUEL_PRICE_PER_LITRE, totalTracker.getUsage() * 0.8 * FuelTracker.FUEL_PRICE_PER_LITRE));
+                FuelTracker.FUEL_PRICE_PER_LITRE, totalTracker.getUsage() / FuelTracker.FUEL_MASS_DENSITY * FuelTracker.FUEL_PRICE_PER_LITRE));
         System.out.println(String.format("Earth -> Saturn: %.2f days", time_earth_saturn));
         System.out.println(String.format("Saturn -> Titan: %.2f days", time_saturn_titan));
         System.out.println(String.format("Titan Landing: %.2f days", time_titan_landing));
