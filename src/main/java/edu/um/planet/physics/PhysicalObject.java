@@ -12,7 +12,7 @@ import java.util.List;
 public class PhysicalObject implements Cloneable {
 
     public static boolean _USE_RUNGE_KUTTA = true;
-    private final static boolean enableGravity = false;
+    private final static boolean enableGravity = true;
 
     private int id;
     private String name;

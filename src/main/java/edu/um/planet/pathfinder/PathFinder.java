@@ -15,6 +15,7 @@ import java.util.Comparator;
 import java.util.concurrent.TimeUnit;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class PathFinder {
@@ -22,7 +23,8 @@ public class PathFinder {
     public static void main(String[] args) {
          HohmannTransfer.MinimalValues minimalValues = new HohmannTransfer().calculateMinimalFuelUsage();
 
-        new PathFinder(399, 606, TITAN_GEO, minimalValues.fuel * 0.75, minimalValues.timeInSeconds / 2.2D);
+        new PathFinder(399, 606, TITAN_GEO, minimalValues.timeInSeconds / 2.1D, minimalValues.fuel * 0.75, 0);
+        //new PathFinder(606, 399, EARTH_GEO, minimalValues.timeInSeconds - (63072000 * 1.5), minimalValues.fuel * (0.5352), (3.153600e+07 - 3.153600e+07));
     }
 
     public final static double EARTH_GEO = 532E3;
@@ -38,7 +40,7 @@ public class PathFinder {
     private double timeConstraint;
     private double fuelConstraint;
 
-    public PathFinder(int start, int end, double geo, double timeConstraint, double fuelConstraint) {
+    public PathFinder(int start, int end, double geo, double timeConstraint, double fuelConstraint, double timeOffset) {
         this.geo = geo;
         this.start = universe.getCelestialBody(start);
         this.end = universe.getCelestialBody(end);
@@ -46,8 +48,14 @@ public class PathFinder {
         this.fuelConstraint = fuelConstraint;
 
         new Debugger(universe, false);
+        if(timeOffset > 0) {
+            universe._TIME_DELTA = 1;
+            universe._LOOP_ITERATIONS = (int) timeOffset;
+            universe.update();
+        }
+
         universe._TIME_DELTA = 60;
-        universe._LOOP_ITERATIONS = 1;
+        universe._LOOP_ITERATIONS = 60;
         calculate();
     }
 
@@ -55,13 +63,22 @@ public class PathFinder {
         //--- Yearly --> Months
         universe.save();
 
-        List<Result> yearly = simulateTimePeriod(0, TimeUnit.DAYS.toMinutes(365), 2, 8);
+        List<Result> yearly = simulateTimePeriod(0, TimeUnit.DAYS.toMinutes(365), 8, 4);
+        System.out.println("------------------------------ YEARLY ------------------------------");
+        for (Result result : yearly) {
+            System.out.println(String.format("%e - %e - %e - %e (%.4f)", result.rocket.timeMeta.timeOffset, result.rocket.timeMeta.travelTime, result.rocket.timeMeta.distance, result.fuelUsage, result.fuelUsage / fuelConstraint));
+        }
+
         List<Result> monthly = new ArrayList<>();
         for(Result result : yearly) {
             Interval interval = result.interval;
             double timeDelta = TimeUnit.DAYS.toMinutes(30);
             int tests = (int) MathUtil.clamp(Interval.of(1, 12), (int) Math.ceil((interval.b() - interval.a()) / timeDelta));
-            monthly.addAll(simulateTimePeriod((long) interval.a(), timeDelta, tests, (int) Math.ceil(tests * 0.5)));
+            monthly.addAll(simulateTimePeriod((long) interval.a(), timeDelta, tests, (int) Math.ceil(tests * 1)));
+        }
+        System.out.println("------------------------------ MONTHLY ------------------------------");
+        for (Result result : monthly) {
+            System.out.println(String.format("%e - %e - %e - %e (%.4f)", result.rocket.timeMeta.timeOffset, result.rocket.timeMeta.travelTime, result.rocket.timeMeta.distance, result.fuelUsage, result.fuelUsage / fuelConstraint));
         }
 
         //--- Months --> Weeks
@@ -72,19 +89,26 @@ public class PathFinder {
             int tests = (int) MathUtil.clamp(Interval.of(1, 4), (int) Math.ceil((interval.b() - interval.a()) / timeDelta));
             weekly.addAll(simulateTimePeriod((long) interval.a(), timeDelta, tests, (int) (tests * 0.5)));
         }
+        System.out.println("------------------------------ WEEKLY ------------------------------");
+        for (Result result : weekly) {
+            System.out.println(String.format("%e - %e - %e - %e (%.4f)", result.rocket.timeMeta.timeOffset, result.rocket.timeMeta.travelTime, result.rocket.timeMeta.distance, result.fuelUsage, result.fuelUsage / fuelConstraint));
+        }
+
 
         //--- Weeks -> Days
         List<Result> days = new ArrayList<>();
-        for(Result result : monthly) {
+        for(Result result : weekly) {
             Interval interval = result.interval;
             double timeDelta = TimeUnit.DAYS.toMinutes(1);
             int tests = (int) MathUtil.clamp(Interval.of(1, 7), (int) Math.ceil((interval.b() - interval.a()) / timeDelta));
             days.addAll(simulateTimePeriod((long) interval.a(), timeDelta, tests, (int) (tests * 0.5)));
         }
-
+        System.out.println("------------------------------ DAILY ------------------------------");
         for (Result result : days) {
             System.out.println(String.format("%e - %e - %e - %e (%.4f)", result.rocket.timeMeta.timeOffset, result.rocket.timeMeta.travelTime, result.rocket.timeMeta.distance, result.fuelUsage, result.fuelUsage / fuelConstraint));
         }
+
+
 
     }
 
@@ -116,10 +140,9 @@ public class PathFinder {
 
         boolean anyoneGettingCloser = true;
         boolean allLaunched = false;
-        double min_distance = Double.MAX_VALUE;
-        CannonBall closestRocket = null;
         universe._LOOP_ITERATIONS = 60;
         universe._TIME_DELTA = 60 * 30;
+
         while (anyoneGettingCloser){
 
             if(!allLaunched) {
@@ -154,9 +177,13 @@ public class PathFinder {
 
             for(Rocket rocket : rockets) {
                 if(rocket.cannonBall.isStillGettingCloser()) {
-                    rocket.timeMeta.travelTime = rocket.timeMeta.timeOffset - universe.getTimeSinceStart();
+                    rocket.timeMeta.travelTime = universe.getTimeSinceStart();
                     rocket.timeMeta.distance = end.getPosition().subtract(rocket.cannonBall.getPosition()).length();
                     anyoneGettingCloser = true;
+                } else if(!rocket.timeMeta.hasData) {
+                    rocket.timeMeta.travelTime = universe.getTimeSinceStart();
+                    rocket.timeMeta.distance = end.getPosition().subtract(rocket.cannonBall.getPosition()).length();
+                    rocket.timeMeta.hasData = true;
                 }
             }
 
@@ -186,15 +213,15 @@ public class PathFinder {
 
         List<Rocket> sortedRockets = rockets.stream()
                 .filter(e -> e.timeMeta.travelTime > 1)
+                .filter(e -> e.timeMeta.travelTime <= timeConstraint)
                 .filter(e -> {
                     FuelTracker fuelTracker = new FuelTracker();
                     fuelTracker.add(e.cannonBall.getMass(), e.cannonBall.getAcceleration().length() * TimeUnit.MINUTES.toSeconds(10));
                     System.out.println(fuelTracker.getUsage() / this.fuelConstraint);
                     return fuelTracker.getUsage() < this.fuelConstraint;
                 })
-                .filter(e -> e.timeMeta.travelTime < this.timeConstraint)
                 .limit(limit)
-                .sorted(Comparator.comparingDouble(o -> o.timeMeta.timeOffset)).collect(Collectors.toList());
+                .sorted(Comparator.comparingDouble(o -> o.timeMeta.travelTime + o.timeMeta.timeOffset)).collect(Collectors.toList());
         List<Result> intervals = new ArrayList<>();
         for (int i = 0; i < sortedRockets.size() - 1; i++) {
             Rocket a = sortedRockets.get(i);
@@ -217,6 +244,7 @@ public class PathFinder {
         public double timeOffset;
         public double travelTime;
         public double distance;
+        public boolean hasData = false;
 
         public TimeMeta(Vector3 position, double timeOffset) {
             this.position = position;
