@@ -9,11 +9,25 @@ import java.awt.*;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * This class is quintessential for the simulation as it basically is representable of every object in the simulation which
+ * is physically present in the world, which is every object.
+ */
 public class PhysicalObject implements Cloneable {
 
+    /**
+     * This determines weather the simulation uses 4th order Runge-Kutta, or Newton's method to solve the differential
+     * equations modelling the physics.
+     */
     public static boolean _USE_RUNGE_KUTTA = true;
+    /**
+     * Used for some tests or debugging.
+     */
     private final static boolean enableGravity = false;
 
+    /**
+     * The unique identifier (id), name and color of the object used to represent it in the 2D rendering of the world.
+     */
     private int id;
     private String name;
     private Color color;
@@ -23,6 +37,16 @@ public class PhysicalObject implements Cloneable {
     private Vector3 position;
     private Vector3 velocity;
 
+    /**
+     * Creates a new phyiscal object.
+     * @param id This is ideally the ID assigned by JPL Horizon, otherwise use negative IDs.
+     * @param name The display name of the object.
+     * @param color The color it should have in the 2D representation.
+     * @param radius
+     * @param mass
+     * @param position
+     * @param velocity
+     */
     public PhysicalObject(int id, String name, Color color, double radius, double mass, Vector3 position, Vector3 velocity) {
         this.id = id;
         this.name = name;

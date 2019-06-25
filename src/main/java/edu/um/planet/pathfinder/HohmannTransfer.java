@@ -1,11 +1,7 @@
 package edu.um.planet.pathfinder;
 
 import edu.um.landing.FuelTracker;
-import edu.um.landing.LandingSimulator;
-import edu.um.landing.lander.ControllerMode;
-import edu.um.landing.lander.LandingModule;
 import edu.um.planet.Universe;
-import edu.um.planet.math.Vector3;
 import edu.um.planet.physics.PhysicalObject;
 
 import java.util.concurrent.TimeUnit;

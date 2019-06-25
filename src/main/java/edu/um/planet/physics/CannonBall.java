@@ -8,7 +8,6 @@ import java.util.List;
 
 public class CannonBall extends PhysicalObject {
 
-
     private Vector3 acceleration;
     private Vector3 targetCoordinate;
     private double accelerateInSeconds = 20 * 60;
