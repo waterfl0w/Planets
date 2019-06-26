@@ -2,6 +2,7 @@ package edu.um.landing.lander;
 
 import edu.um.landing.DataLogger;
 import edu.um.landing.FuelTracker;
+import edu.um.landing.LandingSimulator;
 import edu.um.landing.lander.thruster.RotationThruster;
 import edu.um.landing.lander.thruster.Thruster;
 import edu.um.planet.math.Vector3;
@@ -186,6 +187,10 @@ public class LandingModule {
      */
     public void updateController() {
 
+        if(this.isLanded) {
+            return;
+        }
+
         // --- update timeInSeconds
         this.time += TIME_STEP;
 
@@ -199,7 +204,7 @@ public class LandingModule {
             this.isLanded = true;
 
             double totalError = ((Math.abs(this.realPositions.getX()) + Math.abs(this.realPositions.getZ()) + Math.abs(this.realVelocity.getX()) + Math.abs(this.realVelocity.getZ()) + Math.abs(this.theta) + Math.abs(this.thetaVelocity)) / 0.7);
-
+            fuelTracker.addRaw(fuelTracker.getUsage() * 1000); //correcting, make it tons
             if(!storedData) {
                 List<String> keys = new ArrayList<>(dataLogger.getData().get(dataLogger.getData().keySet().stream().findAny().get()).keySet());
                 StringBuilder header = new StringBuilder();

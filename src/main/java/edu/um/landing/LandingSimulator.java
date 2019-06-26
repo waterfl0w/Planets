@@ -21,12 +21,12 @@ public class LandingSimulator {
     public final static double EARTH_GRAVITY = 9.807;
 
     public static void main(String[] args) {
-        LandingSimulator landingSimulator = new LandingSimulator(true, new LandingModule(false, TITAN_GRAVITY, new Vector3(-1, 1, 1).multiply(PathFinder.TITAN_GEO),
+        LandingSimulator landingSimulator = new LandingSimulator(true, new LandingModule(false, EARTH_GRAVITY, new Vector3(-1, 1, 1).multiply(PathFinder.EARTH_GEO),
                 new Vector3(12, -30, -30),
                 -Math.PI+0.005,
                 0.1,
                 ControllerMode.CLOSED));
-        System.out.println("Landing fuel: " + ( landingSimulator.getLandingModule().getFuelTracker().getUsage() / FuelTracker.FUEL_MASS_DENSITY * FuelTracker.FUEL_PRICE_PER_LITRE));
+        System.out.println("Landing fuel: " + ( (landingSimulator.getLandingModule().getFuelTracker().getUsage()) / FuelTracker.FUEL_MASS_DENSITY * FuelTracker.FUEL_PRICE_PER_LITRE));
     }
 
     //---

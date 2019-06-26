@@ -15,10 +15,13 @@ public class RungeKutta {
             double ti = interval.a() + (i * dt);
             Vector3 k1 = f1(ti, posi, velo).multiply(dt);
             Vector3 l1 = f2(ti, posi, velo).multiply(dt);
+
             Vector3 k2 = f1(ti + dt/2D, posi.add(k1.divide(2)).multiply(dt), velo.add(((l1).divide(2))).multiply(dt));
             Vector3 l2 = f2(ti + dt/2D, posi.add(k1.divide(2)).multiply(dt), velo.add(((l1).divide(2))).multiply(dt));
+
             Vector3 k3 = f1(ti + dt/2D, posi.add(k2.divide(2)).multiply(dt), velo.add(((l2).divide(2))).multiply(dt));
             Vector3 l3 = f2(ti + dt/2D, posi.add(k2.divide(2)).multiply(dt), velo.add(((l2).divide(2))).multiply(dt));
+
             Vector3 k4 = f1(ti + dt, posi.add((k3.multiply(dt))), velo.add((l3.multiply(dt))));
             Vector3 l4 = f2(ti + dt, posi.add((k3.multiply(dt))), velo.add((l3.multiply(dt))));
 
