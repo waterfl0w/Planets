@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 public class LandingModule {
 
@@ -425,7 +426,7 @@ public class LandingModule {
         //--- If it has landed, we no longer want to update its position.
         if(this.isLanded) return;
 
-        this.fuelTracker.add(mass, velocity.length() * TIME_STEP);
+        //this.fuelTracker.add(mass, velocity.length() * TIME_STEP);
 
         //--- Update the position the controller is aware of.
         this.position = this.position.add(this.velocity.multiply(TIME_STEP));
@@ -455,6 +456,8 @@ public class LandingModule {
             this.thetaVelocity = 0;
             return;
         }
+
+        Vector3 currentVelocity = this.velocity.clone();
 
         //--- Thrusters
         if(!this.storedData) {
